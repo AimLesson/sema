@@ -8,7 +8,10 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\ProgramKerja;
 use Filament\Resources\Resource;
+use App\Exports\ProgramKerjaExport;
 use Filament\Forms\Components\Grid;
+use Filament\Tables\Actions\Action;
+use Maatwebsite\Excel\Facades\Excel;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Repeater;
@@ -19,6 +22,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\RichEditor;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\ProgramKerjaResource\Pages;
 use App\Filament\Resources\ProgramKerjaResource\RelationManagers;
@@ -46,7 +50,7 @@ class ProgramKerjaResource extends Resource
                 Repeater::make('rencanaAnggaranBelanja')->relationship('rencanaAnggaranBelanja')->label('Rencana Anggaran Belanja')->columnSpanFull()->nullable()->collapsed()
                     ->schema([
                         TextInput::make('name')->label('Item')->required(),
-                        Select::make('kategori')->label('Kategori')->options(['income' => 'Anggaran Mandiri','outcome' => 'Anggaran Proposal',])->required()->reactive(),
+                        Select::make('kategori')->label('Kategori')->options(['income' => 'Anggaran Mandiri', 'outcome' => 'Anggaran Proposal',])->required()->reactive(),
                         Select::make('divisi_id')->label('Divisi')->relationship('divisi', 'name')->searchable()->preload()->required(),
                         TextInput::make('qty')->default(1)->required()->reactive()
                             ->afterStateUpdated(function ($set, $state, $get) {
@@ -77,7 +81,7 @@ class ProgramKerjaResource extends Resource
                                     $set('total_price', $totalDivisi);
                                 }
                             }),
-                        TextInput::make('unit_total') ->label('Total Harga')->default(0),
+                        TextInput::make('unit_total')->label('Total Harga')->default(0),
                         TextInput::make('total_price')->label('Total Anggaran Divisi')->default(0),
                     ])
                     ->columns(4)
@@ -149,6 +153,13 @@ class ProgramKerjaResource extends Resource
                 //
             ])
             ->actions([
+                Action::make('export')
+                    ->label('Download Excel')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->action(fn ($record) => Excel::download(
+                        new ProgramKerjaExport(ProgramKerja::where('id', $record->id)->get()), // ✅ Ensure Eloquent Collection
+                        'program_kerja_' . str_replace(' ', '_', $record->name) . '.xlsx'
+                    )),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\ViewAction::make()->modalHeading('Detail Program Kerja')->modalWidth('5xl')->form([
@@ -163,56 +174,56 @@ class ProgramKerjaResource extends Resource
                         TextArea::make('approval.wakil_ketua_bidang_3_notes')->label('Catatan Wakil Ketua Bidang 3')->disabled()->columnSpanFull(),
                         TextArea::make('approval.ketua_senat_mahasiswa_notes')->label('Catatan Ketua Senat Mahasiswa')->disabled()->columnSpanFull(),
                         Repeater::make('rencanaAnggaranBelanja')->relationship('rencanaAnggaranBelanja')->label('Rencana Anggaran Belanja')->columnSpanFull()->nullable()->collapsed()
-                        ->schema([
-                            TextInput::make('name')->label('Item')->required(),
-                            Select::make('kategori')->label('Kategori')->options(['income' => 'Anggaran Mandiri','outcome' => 'Anggaran Proposal',])->required()->reactive(),
-                            Select::make('divisi_id')->label('Divisi')->relationship('divisi', 'name')->searchable()->preload()->required(),
-                            TextInput::make('qty')->default(1)->required()->reactive()
-                                ->afterStateUpdated(function ($set, $state, $get) {
-                                    $unitPrice = $get('unit_price') ?? 0;
-                                    $set('unit_total', $state * $unitPrice);
+                            ->schema([
+                                TextInput::make('name')->label('Item')->required(),
+                                Select::make('kategori')->label('Kategori')->options(['income' => 'Anggaran Mandiri', 'outcome' => 'Anggaran Proposal',])->required()->reactive(),
+                                Select::make('divisi_id')->label('Divisi')->relationship('divisi', 'name')->searchable()->preload()->required(),
+                                TextInput::make('qty')->default(1)->required()->reactive()
+                                    ->afterStateUpdated(function ($set, $state, $get) {
+                                        $unitPrice = $get('unit_price') ?? 0;
+                                        $set('unit_total', $state * $unitPrice);
 
-                                    // Update Total Anggaran Divisi dynamically
-                                    $divisiId = $get('divisi_id') ?? null;
-                                    if ($divisiId) {
-                                        $totalDivisi = collect($get('../../rencanaAnggaranBelanja'))
-                                            ->where('divisi_id', $divisiId)
-                                            ->sum('unit_total');
-                                        $set('total_price', $totalDivisi);
-                                    }
-                                }),
-                            TextInput::make('unit')->label('Satuan')->required(),
-                            TextInput::make('unit_price')->required()->reactive()
-                                ->afterStateUpdated(function ($set, $state, $get) {
-                                    $qty = $get('qty') ?? 0;
-                                    $set('unit_total', $state * $qty);
+                                        // Update Total Anggaran Divisi dynamically
+                                        $divisiId = $get('divisi_id') ?? null;
+                                        if ($divisiId) {
+                                            $totalDivisi = collect($get('../../rencanaAnggaranBelanja'))
+                                                ->where('divisi_id', $divisiId)
+                                                ->sum('unit_total');
+                                            $set('total_price', $totalDivisi);
+                                        }
+                                    }),
+                                TextInput::make('unit')->label('Satuan')->required(),
+                                TextInput::make('unit_price')->required()->reactive()
+                                    ->afterStateUpdated(function ($set, $state, $get) {
+                                        $qty = $get('qty') ?? 0;
+                                        $set('unit_total', $state * $qty);
 
-                                    // Update Total Anggaran Divisi dynamically
-                                    $divisiId = $get('divisi_id') ?? null;
-                                    if ($divisiId) {
-                                        $totalDivisi = collect($get('../../rencanaAnggaranBelanja'))
-                                            ->where('divisi_id', $divisiId)
-                                            ->sum('unit_total');
-                                        $set('total_price', $totalDivisi);
-                                    }
-                                }),
-                            TextInput::make('unit_total') ->label('Total Harga')->default(0),
-                            TextInput::make('total_price')->label('Total Anggaran Divisi')->default(0),
-                        ])
-                        ->columns(4)
-                        ->addActionLabel('Tambah Item')
-                        ->reorderableWithButtons()
-                        ->reorderableWithDragAndDrop(false)
-                        ->cloneable()
-                        ->itemLabel(fn (array $state): ?string => isset($state['name']) && isset($state['unit_total']) ? $state['name'] . ' - Rp ' . number_format($state['unit_total'], 0, ',', '.') : null)
-                        ->afterStateUpdated(function ($set, $state) {
-                            // Auto-update Anggaran Mandiri, Proposal, and Total Anggaran
-                            $selfBudget = collect($state)->where('kategori', 'income')->sum('unit_total');
-                            $proposalBudget = collect($state)->where('kategori', 'outcome')->sum('unit_total');
-                            $set('self_budget', $selfBudget);
-                            $set('proposal_budget', $proposalBudget);
-                            $set('total_budget', $selfBudget + $proposalBudget);
-                        }),
+                                        // Update Total Anggaran Divisi dynamically
+                                        $divisiId = $get('divisi_id') ?? null;
+                                        if ($divisiId) {
+                                            $totalDivisi = collect($get('../../rencanaAnggaranBelanja'))
+                                                ->where('divisi_id', $divisiId)
+                                                ->sum('unit_total');
+                                            $set('total_price', $totalDivisi);
+                                        }
+                                    }),
+                                TextInput::make('unit_total')->label('Total Harga')->default(0),
+                                TextInput::make('total_price')->label('Total Anggaran Divisi')->default(0),
+                            ])
+                            ->columns(4)
+                            ->addActionLabel('Tambah Item')
+                            ->reorderableWithButtons()
+                            ->reorderableWithDragAndDrop(false)
+                            ->cloneable()
+                            ->itemLabel(fn (array $state): ?string => isset($state['name']) && isset($state['unit_total']) ? $state['name'] . ' - Rp ' . number_format($state['unit_total'], 0, ',', '.') : null)
+                            ->afterStateUpdated(function ($set, $state) {
+                                // Auto-update Anggaran Mandiri, Proposal, and Total Anggaran
+                                $selfBudget = collect($state)->where('kategori', 'income')->sum('unit_total');
+                                $proposalBudget = collect($state)->where('kategori', 'outcome')->sum('unit_total');
+                                $set('self_budget', $selfBudget);
+                                $set('proposal_budget', $proposalBudget);
+                                $set('total_budget', $selfBudget + $proposalBudget);
+                            }),
                     ]),
                 ])
             ])

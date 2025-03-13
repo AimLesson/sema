@@ -69,6 +69,7 @@ class AdminPanelProvider extends PanelProvider
                         hasAvatars: false,
                         slug: 'my-profile'
                     )
-            );
+            )
+            ->sidebarFullyCollapsibleOnDesktop();;
     }
 }
