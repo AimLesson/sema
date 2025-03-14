@@ -92,17 +92,17 @@ class DivisiResource extends Resource
 
     public static function canCreate(): bool
     {
-        return auth()->user()->hasAnyRole(['Superadmin','Sekretaris']);
+        return auth()->user()->hasAnyRole(['Superadmin','Sekretaris','Ketua Senat Mahasiswa']);
     }
 
     public static function canEdit($record): bool
     {
-        return auth()->user()->hasAnyRole(['Superadmin', 'Sekretaris']);
+        return auth()->user()->hasAnyRole(['Superadmin', 'Sekretaris','Ketua Senat Mahasiswa']);
     }
 
     public static function canDelete($record): bool
     {
-        return auth()->user()->hasAnyRole(['Superadmin','Sekretaris']);
+        return auth()->user()->hasAnyRole(['Superadmin','Sekretaris','Ketua Senat Mahasiswa']);
     }
 
 }

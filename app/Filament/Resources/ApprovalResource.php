@@ -2,15 +2,16 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ApprovalResource\Pages;
-use App\Models\Approval;
 use Filament\Forms;
+use Filament\Tables;
+use App\Models\Approval;
+use Filament\Resources\Resource;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\TextArea;
-use Filament\Tables;
-use Filament\Resources\Resource;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\RichEditor;
+use App\Filament\Resources\ApprovalResource\Pages;
 
 class ApprovalResource extends Resource
 {
@@ -29,7 +30,7 @@ class ApprovalResource extends Resource
                     ->label('Wakil Ketua Bidang 2 Approval')
                     ->visible(fn () => auth()->user()->hasRole('Wakil Ketua Bidang 2')), // ✅ Correct Role Name
 
-                TextArea::make('wakil_ketua_bidang_2_notes')
+                RichEditor::make('wakil_ketua_bidang_2_notes')
                     ->label('Notes Wakil Ketua Bidang 2')
                     ->visible(fn () => auth()->user()->hasRole('Wakil Ketua Bidang 2')), // ✅ Correct Role Name
 
@@ -37,7 +38,7 @@ class ApprovalResource extends Resource
                     ->label('Wakil Ketua Bidang 3 Approval')
                     ->visible(fn () => auth()->user()->hasRole('Wakil Ketua Bidang 3')),
 
-                TextArea::make('wakil_ketua_bidang_3_notes')
+                RichEditor::make('wakil_ketua_bidang_3_notes')
                     ->label('Notes Wakil Ketua Bidang 3')
                     ->visible(fn () => auth()->user()->hasRole('Wakil Ketua Bidang 3')),
 
@@ -45,7 +46,7 @@ class ApprovalResource extends Resource
                     ->label('Ketua Senat Mahasiswa Approval')
                     ->visible(fn () => auth()->user()->hasRole('Ketua Senat Mahasiswa')),
 
-                TextArea::make('ketua_senat_mahasiswa_notes')
+                RichEditor::make('ketua_senat_mahasiswa_notes')
                     ->label('Notes Ketua Senat Mahasiswa')
                     ->visible(fn () => auth()->user()->hasRole('Ketua Senat Mahasiswa')),
             ]);
@@ -127,6 +128,8 @@ class ApprovalResource extends Resource
             'Wakil Ketua Bidang 2',
             'Wakil Ketua Bidang 3',
             'Ketua Senat Mahasiswa',
+            'Wakil Ketua Senat Mahasiswa',
+            'Bendahara',
         ]);
     }
 }

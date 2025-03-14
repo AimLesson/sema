@@ -268,7 +268,7 @@ class ProgramKerjaResource extends Resource
 
     public static function canDelete($record): bool
     {
-        return auth()->user()->hasAnyRole(['Superadmin', 'Sekretaris', 'Bendahara']);
+        return auth()->user()->hasAnyRole(['Superadmin', 'Ketua Senat Mahasiswa']);
     }
 
     public static function getNavigationBadge(): ?string

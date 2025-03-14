@@ -110,12 +110,21 @@ class UserResource extends Resource
     public static function canEdit($record): bool
     {
         $user = auth()->user();
-        return $user->hasAnyRole(['Superadmin', 'Sekretaris','Ketua Senat Mahasiswa']);
+        return $user->hasAnyRole(['Superadmin', 'Sekretaris']);
     }
 
     public static function canDelete($record): bool
     {
         return auth()->user()->hasAnyRole(['Superadmin', 'Sekretaris']);
+    }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()->hasAnyRole([
+            'Superadmin',
+            'Sekretaris',
+            'Ketua Senat Mahasiswa',
+        ]);
     }
 
     public static function getNavigationBadge(): ?string
