@@ -14,6 +14,9 @@ class Calendar extends CalendarWidget
 {
     protected string $calendarView = 'dayGridMonth';
     // protected bool $eventClickEnabled = true; // ✅ Enable clicking events
+    protected static ?int $sort = 4;
+
+    protected int | string | array $columnSpan = 'full';
 
     public function getEvents(array $fetchInfo = []): Collection | array
     {

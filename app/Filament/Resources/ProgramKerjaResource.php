@@ -18,6 +18,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\RichEditor;
@@ -274,5 +275,21 @@ class ProgramKerjaResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'date', 'description'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Nama Program' => $record->name,
+            'Tanggal' => $record->date,
+            'Organisasi' => $record->organisasi->name,
+            'Departemen' => $record->departement->name,
+            'Total Anggaran' => 'Rp ' . number_format($record->total_budget, 0, ',', '.'),
+        ];
     }
 }

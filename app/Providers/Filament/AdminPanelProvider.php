@@ -8,19 +8,23 @@ use Filament\Widgets;
 use Livewire\Livewire;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use App\Livewire\ProgramKerjaViewModal;
 use Filament\Navigation\NavigationGroup;
 use Filament\Http\Middleware\Authenticate;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
 use Illuminate\Session\Middleware\StartSession;
+use Devonab\FilamentEasyFooter\EasyFooterPlugin;
 use Illuminate\Cookie\Middleware\EncryptCookies;
+use TomatoPHP\FilamentNotes\FilamentNotesPlugin;
 use Filament\Http\Middleware\AuthenticateSession;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
+use TomatoPHP\FilamentNotes\Filament\Widgets\NotesWidget;
+use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use App\Livewire\ProgramKerjaViewModal;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -43,7 +47,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
-                \App\Filament\Widgets\Calendar::class
+                \App\Filament\Widgets\Calendar::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -59,7 +63,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->plugin(
+            ->plugins([
                 BreezyCore::make()
                     ->myProfile(
                         shouldRegisterUserMenu: true,
@@ -68,8 +72,13 @@ class AdminPanelProvider extends PanelProvider
                         navigationGroup: 'Settings',
                         hasAvatars: false,
                         slug: 'my-profile'
-                    )
-            )
-            ->sidebarFullyCollapsibleOnDesktop();;
+                    ),
+                EasyFooterPlugin::make()
+                    ->withFooterPosition('footer')
+                    ->withLoadTime('This page loaded in'),
+                GlobalSearchModalPlugin::make()
+                ->closeByClickingAway(enabled: false),
+            ])
+            ->sidebarFullyCollapsibleOnDesktop();
     }
 }

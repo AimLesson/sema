@@ -7,6 +7,8 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "charrafimed/global-search-modal": "^3.7",
+        "devonab/filament-easy-footer": "^1.1",
         "filament/filament": "^3.3",
         "guava/calendar": "^1.13",
         "jeffgreco13/filament-breezy": "^2.6",
